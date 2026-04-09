@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breakfast Suggester</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f3f0;
+      padding: 1rem;
+      min-height: 100vh;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1a1a18;
+      }
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .header {
+      padding: 1.5rem 1rem 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 500;
+      color: #3d3d3a;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      h1 {
+        color: #c2c0b6;
+      }
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #73726c;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .subtitle {
+        color: #9c9a92;
+      }
+    }
+
+    .suggestion-box {
+      background: #ede8e0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 1rem;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .suggestion-box {
+        background: #2a2a28;
+      }
+    }
+
+    .suggestion-label {
+      font-size: 13px;
+      color: #73726c;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .suggestion-label {
+        color: #9c9a92;
+      }
+    }
+
+    .suggestion-text {
+      font-size: 22px;
+      font-weight: 600;
+      color: #3d3d3a;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .suggestion-text {
+        color: #c2c0b6;
+      }
+    }
+
+    .suggestion-ingredients {
+      font-size: 12px;
+      color: #73726c;
+      line-height: 1.5;
+      max-height: 80px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .suggestion-ingredients {
+        color: #9c9a92;
+      }
+    }
+
+    .button-group {
+      padding: 0 1rem 1.5rem;
+    }
+
+    button {
+      font-family: inherit;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 0.5px solid #bbb9b0;
+      background: white;
+      color: #3d3d3a;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      button {
+        background: #2a2a28;
+        color: #c2c0b6;
+        border-color: #5f5e5a;
+      }
+    }
+
+    button:hover {
+      background: #f5f3f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      button:hover {
+        background: #3a3a38;
+      }
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .suggest-btn {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid #bbb9b0;
+      font-weight: 600;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .suggest-btn {
+        border-color: #5f5e5a;
+      }
+    }
+
+    .toggle-btn {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .toggle-arrow {
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .management-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 0 1rem 1.5rem;
+      display: none;
+      border: 0.5px solid #bbb9b0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .management-panel {
+        background: #2a2a28;
+        border-color: #5f5e5a;
+      }
+    }
+
+    .management-panel.open {
+      display: block;
+    }
+
+    .setting-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #3d3d3a;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .setting-group label {
+        color: #c2c0b6;
+      }
+    }
+
+    .setting-group input[type="range"] {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    .repeat-days-display {
+      font-size: 12px;
+      color: #73726c;
+      text-align: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .repeat-days-display {
+        color: #9c9a92;
+      }
+    }
+
+    .add-dish-section {
+      border-top: 0.5px solid #bbb9b0;
+      padding-top: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .add-dish-section {
+        border-color: #5f5e5a;
+      }
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #3d3d3a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      h2 {
+        color: #c2c0b6;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"],
+    textarea {
+      padding: 10px 12px;
+      border: 0.5px solid #bbb9b0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: white;
+      color: #3d3d3a;
+      resize: vertical;
+      min-height: 36px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      input[type="text"],
+      textarea {
+        background: #1a1a18;
+        color: #c2c0b6;
+        border-color: #5f5e5a;
+      }
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #378add;
+    }
+
+    textarea {
+      min-height: 60px;
+      font-size: 13px;
+    }
+
+    .input-label {
+      font-size: 12px;
+      color: #73726c;
+      margin-bottom: 0.25rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .input-label {
+        color: #9c9a92;
+      }
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .button-row button {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .dish-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 0.5px solid #bbb9b0;
+      padding-top: 1rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .dish-list {
+        border-color: #5f5e5a;
+      }
+    }
+
+    .dish-item {
+      background: #f5f3f0;
+      border-radius: 8px;
+      padding: 12px;
+      border: 0.5px solid #bbb9b0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .dish-item {
+        background: #1a1a18;
+        border-color: #5f5e5a;
+      }
+    }
+
+    .dish-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .dish-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #3d3d3a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .dish-name {
+        color: #c2c0b6;
+      }
+    }
+
+    .dish-remove {
+      padding: 4px 8px;
+      background: transparent;
+      border: 0.5px solid #bbb9b0;
+      font-size: 12px;
+      color: #73726c;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .dish-remove {
+        border-color: #5f5e5a;
+        color: #9c9a92;
+      }
+    }
+
+    .dish-ingredients {
+      font-size: 12px;
+      color: #73726c;
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .dish-ingredients {
+        color: #9c9a92;
+      }
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: #73726c;
+      text-align: center;
+      padding: 1.5rem 0;
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .empty-state {
+        color: #9c9a92;
+      }
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .alert {
+      padding: 12px;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .alert-success {
+      background: #eaf3de;
+      color: #3b6d11;
+      border: 0.5px solid #97c459;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .alert-success {
+        background: #173404;
+        color: #c0dd97;
+        border-color: #3b6d11;
+      }
+    }
+
+    .alert-error {
+      background: #fcebeb;
+      color: #a32d2d;
+      border: 0.5px solid #f09595;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .alert-error {
+        background: #501313;
+        color: #f7c1c1;
+        border-color: #a32d2d;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>What's for breakfast?</h1>
+      <p class="subtitle">Quick suggestions to beat decision fatigue</p>
+    </div>
+
+    <div class="suggestion-box">
+      <p class="suggestion-label">Today's suggestion</p>
+      <p class="suggestion-text" id="suggestion">Add some dishes first →</p>
+      <p class="suggestion-ingredients" id="suggestionIngredients"></p>
+    </div>
+
+    <div class="button-group">
+      <button id="suggestBtn" class="suggest-btn" onclick="suggestDish()">Suggest Breakfast</button>
+      <button class="toggle-btn" onclick="toggleManagement()">
+        ⚙️ Manage dishes
+        <span class="toggle-arrow" id="toggleArrow">▼</span>
+      </button>
+    </div>
+
+    <div class="management-panel" id="managementPanel">
+      <div id="alertContainer"></div>
+
+      <div class="setting-group">
+        <label for="repeatDays">Don't repeat from last <span id="repeatDaysValue">3</span> days</label>
+        <input type="range" id="repeatDays" min="0" max="14" value="3" oninput="updateRepeatDays(this.value)">
+        <div class="repeat-days-display">Slide to adjust (0 = any dish, 14 = max gap)</div>
+      </div>
+
+      <div class="add-dish-section">
+        <h2>Add a new dish</h2>
+        <div class="input-group">
+          <div>
+            <div class="input-label">Dish name</div>
+            <input id="dishInput" type="text" placeholder="e.g., Poha">
+          </div>
+          <div>
+            <div class="input-label">Ingredients (optional)</div>
+            <textarea id="ingredientsInput" placeholder="e.g., onions, potatoes, turmeric, oil"></textarea>
+          </div>
+        </div>
+        <div class="button-row">
+          <button onclick="addDish()">Add Dish</button>
+          <button onclick="clearAddForm()">Clear</button>
+        </div>
+        <div class="button-row">
+          <button onclick="exportDishes()">📥 Backup</button>
+          <button onclick="importDishes()">📤 Restore</button>
+        </div>
+      </div>
+
+      <div class="add-dish-section">
+        <h2>Your dishes</h2>
+        <p class="empty-state" id="emptyState">No dishes yet. Add a few to get started!</p>
+        <div class="dish-list" id="dishList"></div>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" accept=".json">
+
+  <script>
+    const STORAGE_KEY = 'breakfast_dishes_v2';
+
+    function loadData() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) {
+        return {
+          dishes: [],
+          settings: { repeatDays: 3 },
+          history: []
+        };
+      }
+      return JSON.parse(stored);
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      renderDishes();
+      updateSuggestionUI();
+    }
+
+    function toggleManagement() {
+      const panel = document.getElementById('managementPanel');
+      const arrow = document.getElementById('toggleArrow');
+      panel.classList.toggle('open');
+      arrow.classList.toggle('open');
+    }
+
+    function updateRepeatDays(value) {
+      const data = loadData();
+      data.settings.repeatDays = parseInt(value);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      document.getElementById('repeatDaysValue').textContent = value;
+    }
+
+    function renderDishes() {
+      const data = loadData();
+      const listEl = document.getElementById('dishList');
+      const emptyEl = document.getElementById('emptyState');
+
+      listEl.innerHTML = '';
+
+      if (data.dishes.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+
+      data.dishes.forEach((dish, idx) => {
+        const item = document.createElement('div');
+        item.className = 'dish-item';
+        item.innerHTML = `
+          <div class="dish-header">
+            <span class="dish-name">${escapeHtml(dish.name)}</span>
+            <button class="dish-remove" onclick="removeDish(${idx})">Remove</button>
+          </div>
+          ${dish.ingredients ? `<div class="dish-ingredients">${escapeHtml(dish.ingredients)}</div>` : ''}
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    function addDish() {
+      const data = loadData();
+      const name = document.getElementById('dishInput').value.trim();
+      const ingredients = document.getElementById('ingredientsInput').value.trim();
+
+      if (!name) {
+        showAlert('Please enter a dish name', 'error');
+        return;
+      }
+
+      if (data.dishes.some(d => d.name === name)) {
+        showAlert('This dish already exists', 'error');
+        return;
+      }
+
+      data.dishes.push({
+        name: name,
+        ingredients: ingredients || null
+      });
+
+      saveData(data);
+      clearAddForm();
+      showAlert(`Added "${name}"!`, 'success');
+    }
+
+    function removeDish(idx) {
+      const data = loadData();
+      data.dishes.splice(idx, 1);
+      saveData(data);
+    }
+
+    function clearAddForm() {
+      document.getElementById('dishInput').value = '';
+      document.getElementById('ingredientsInput').value = '';
+    }
+
+    function getAvailableDishes() {
+      const data = loadData();
+      const repeatDays = data.settings.repeatDays;
+      const today = new Date();
+
+      if (repeatDays === 0) {
+        return data.dishes;
+      }
+
+      const cutoffDate = new Date(today);
+      cutoffDate.setDate(cutoffDate.getDate() - repeatDays);
+
+      const recentDishes = data.history
+        .filter(h => new Date(h.date) >= cutoffDate)
+        .map(h => h.dish);
+
+      return data.dishes.filter(dish => !recentDishes.includes(dish.name));
+    }
+
+    function suggestDish() {
+      const available = getAvailableDishes();
+
+      if (available.length === 0) {
+        const data = loadData();
+        if (data.dishes.length === 0) {
+          showAlert('Add some dishes first!', 'error');
+          return;
+        } else {
+          showAlert(`All dishes suggested in last ${data.settings.repeatDays} days. Suggesting anyway!`, 'error');
+          suggestFromAll();
+          return;
+        }
+      }
+
+      const suggested = available[Math.floor(Math.random() * available.length)];
+
+      const data = loadData();
+      data.history.push({
+        dish: suggested.name,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+      displaySuggestion(suggested);
+    }
+
+    function suggestFromAll() {
+      const data = loadData();
+      if (data.dishes.length === 0) return;
+
+      const suggested = data.dishes[Math.floor(Math.random() * data.dishes.length)];
+
+      data.history.push({
+        dish: suggested.name,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      displaySuggestion(suggested);
+    }
+
+    function displaySuggestion(dish) {
+      const suggestionEl = document.getElementById('suggestion');
+      const ingredientsEl = document.getElementById('suggestionIngredients');
+
+      suggestionEl.textContent = dish.name;
+      ingredientsEl.textContent = dish.ingredients ? `Ingredients: ${dish.ingredients}` : '';
+    }
+
+    function showAlert(message, type = 'success') {
+      const container = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      container.appendChild(alert);
+
+      setTimeout(() => {
+        alert.remove();
+      }, 3000);
+    }
+
+    function exportDishes() {
+      const data = loadData();
+      const exportData = {
+        version: 2,
+        exported: new Date().toISOString(),
+        dishes: data.dishes,
+        settings: data.settings
+      };
+
+      const json = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `breakfast-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showAlert(`Backed up ${data.dishes.length} dishes!`, 'success');
+    }
+
+    function importDishes() {
+      const input = document.getElementById('fileInput');
+      input.click();
+    }
+
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (imported.dishes && Array.isArray(imported.dishes)) {
+            const data = loadData();
+            data.dishes = imported.dishes;
+            if (imported.settings) {
+              data.settings = imported.settings;
+              document.getElementById('repeatDays').value = imported.settings.repeatDays;
+              document.getElementById('repeatDaysValue').textContent = imported.settings.repeatDays;
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            renderDishes();
+            updateSuggestionUI();
+            showAlert(`Restored ${imported.dishes.length} dishes!`, 'success');
+          } else {
+            showAlert('Invalid backup file format', 'error');
+          }
+        } catch (err) {
+          showAlert('Error reading backup file', 'error');
+        }
+      };
+      reader.readAsText(file);
+
+      e.target.value = '';
+    });
+
+    function updateSuggestionUI() {
+      const data = loadData();
+      const suggestBtn = document.getElementById('suggestBtn');
+      suggestBtn.disabled = data.dishes.length === 0;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    document.getElementById('dishInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addDish();
+    });
+
+    document.getElementById('repeatDays').value = loadData().settings.repeatDays;
+    document.getElementById('repeatDaysValue').textContent = loadData().settings.repeatDays;
+
+    renderDishes();
+    updateSuggestionUI();
+  </script>
+</body>
+</html>
